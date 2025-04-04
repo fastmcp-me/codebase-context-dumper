@@ -1,117 +1,98 @@
 # codebase-context-dumper MCP Server
 
-A Model Context Protocol server
+[![npm version](https://badge.fury.io/js/%40lex-tools%2Fcodebase-context-dumper.svg)](https://badge.fury.io/js/%40lex-tools%2Fcodebase-context-dumper)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-This is a TypeScript-based MCP server designed to provide context from a software project's codebase. It exposes a tool that recursively reads files from a specified directory, respecting `.gitignore` rules, skipping binary files, and concatenating the content of valid text files. It supports chunking the output to handle large codebases.
+A Model Context Protocol (MCP) server designed to easily dump your codebase context into Large Language Models (LLMs).
 
-## Features
+## Why Use This?
 
-### Tools
+Large context windows in LLMs are powerful, but manually selecting and formatting files from a large codebase is tedious. This tool automates the process by:
 
-- **`dump_codebase_context`**: Recursively reads text files from a specified directory.
-    - **Functionality**:
-        - Scans the directory provided in `base_path`.
-        - Respects `.gitignore` files at all levels to exclude unwanted files/directories (including `.git` by default).
-        - Detects and skips binary files.
-        - Reads the content of each valid text file.
-        - Prepends a header (`--- START: relative/path/to/file ---`) and appends a footer (`--- END: relative/path/to/file ---`) to each file's content.
-        - Concatenates all processed file contents into a single string.
-    - **Input Parameters**:
-        - `base_path` (string, required): The absolute path to the project directory to scan.
-        - `num_chunks` (integer, optional, default: 1): The total number of chunks to divide the output into. Must be >= 1.
-        - `chunk_index` (integer, optional, default: 1): The 1-based index of the chunk to return. Requires `num_chunks > 1` and `chunk_index <= num_chunks`.
-    - **Output**: Returns the concatenated (and potentially chunked) text content.
+*   Recursively scanning your project directory.
+*   Including text files from the specified directory tree that are not excluded by `.gitignore` rules.
+*   Automatically skipping binary files.
+*   Concatenating the content with clear file path markers.
+*   Supporting chunking to handle codebases larger than the LLM's context window.
+*   Integrating seamlessly with MCP-compatible clients.
 
-## Development
+## Usage (Recommended: npx)
 
-Install dependencies:
-```bash
-npm install
-```
+The easiest way to use this tool is via `npx`, which runs the latest version without needing a local installation.
 
-Build the server:
-```bash
-npm run build
-```
-
-For development with auto-rebuild:
-```bash
-npm run watch
-```
-
-## Releasing
-
-This project uses [standard-version](https://github.com/conventional-changelog/standard-version) combined with [Conventional Commits](https://www.conventionalcommits.org/) for automated versioning, changelog generation, and tagging.
-
-To create a new release:
-
-1.  Ensure your Git working directory is clean.
-2.  Make sure your commit messages follow the Conventional Commits format (e.g., `feat: ...`, `fix: ...`, `BREAKING CHANGE: ...`).
-3.  Run the release script:
-    ```bash
-    npm run release
-    ```
-    This will bump the version in `package.json`, update `CHANGELOG.md`, commit the changes, and create a Git tag.
-4.  Push the commit and tag to the remote repository:
-    ```bash
-    git push --follow-tags origin main # Or your default branch
-    ```
-5.  (Optional) Publish the new version to npm:
-    ```bash
-    npm publish
-    ```
-
-
-## Local Installation & Usage
-
-To use with Claude Desktop, add the server config:
-
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+Configure your MCP client (e.g., Claude Desktop, VS Code extensions) to use the following command:
 
 ```json
 {
   "mcpServers": {
     "codebase-context-dumper": {
-      "command": "/path/to/local/codebase-context-dumper/build/index.js" // Path to your local build
+      "command": "npx",
+      "args": [
+        "-y",
+        "@lex-tools/codebase-context-dumper"
+      ]
     }
   }
 }
 ```
 
-## Publishing to npm & Usage with npx
+The MCP client will then be able to invoke the `dump_codebase_context` tool provided by this server.
 
-Once the package is ready and you have appropriate permissions on npm:
+## Features & Tool Details
 
-1.  **Publish the package:**
+### Tool: `dump_codebase_context`
+
+Recursively reads text files from a specified directory, respecting `.gitignore` rules and skipping binary files. Concatenates content with file path headers/footers. Supports chunking the output for large codebases.
+
+**Functionality**:
+
+*   Scans the directory provided in `base_path`.
+*   Respects `.gitignore` files at all levels (including nested ones and `.git` by default).
+*   Detects and skips binary files.
+*   Reads the content of each valid text file.
+*   Prepends a header (`--- START: relative/path/to/file ---`) and appends a footer (`--- END: relative/path/to/file ---`) to each file's content.
+*   Concatenates all processed file contents into a single string.
+
+**Input Parameters**:
+
+*   `base_path` (string, required): The absolute path to the project directory to scan.
+*   `num_chunks` (integer, optional, default: 1): The total number of chunks to divide the output into. Must be >= 1.
+*   `chunk_index` (integer, optional, default: 1): The 1-based index of the chunk to return. Requires `num_chunks > 1` and `chunk_index <= num_chunks`.
+
+**Output**: Returns the concatenated (and potentially chunked) text content.
+
+## Local Installation & Usage (Advanced)
+
+If you prefer to run a local version (e.g., for development):
+
+1.  Clone the repository:
     ```bash
-    npm publish
+    git clone git@github.com:lex-tools/codebase-context-dumper.git
+    cd codebase-context-dumper
     ```
-
-2.  **Configure MCP Client (e.g., Claude Desktop):**
-    Update your MCP client configuration to use `npx` to run the published package. The client will automatically download and execute the latest version.
-
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Build the server:
+    ```bash
+    npm run build
+    ```
+4.  Configure your MCP client to point to the local build output:
     ```json
     {
       "mcpServers": {
         "codebase-context-dumper": {
-          "command": "npx",
-          "args": [
-            "-y",
-            "@lex-tools/codebase-context-dumper"
-          ],
+          "command": "/path/to/your/local/codebase-context-dumper/build/index.js" // Adjust path
         }
       }
     }
     ```
 
+## Contributing
 
-### Debugging
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on development, debugging, and releasing new versions.
 
-Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
+## License
 
-```bash
-npm run inspector
-```
-
-The Inspector will provide a URL to access debugging tools in your browser.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
