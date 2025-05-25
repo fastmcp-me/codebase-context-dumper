@@ -1,5 +1,6 @@
 # codebase-context-dumper MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@lex-tools/codebase-context-dumper)](https://smithery.ai/server/@lex-tools/codebase-context-dumper)
 [![npm version](https://badge.fury.io/js/%40lex-tools%2Fcodebase-context-dumper.svg)](https://badge.fury.io/js/%40lex-tools%2Fcodebase-context-dumper)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
